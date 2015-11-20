@@ -49,7 +49,7 @@ The allure of a district, in other words, is not imposed from the beginning, ins
 ### Residential movement process
 When an agent is set to relocate, or first enters the system, compares its culture string to the allure of each neighbourhood that have one, and finds the empty spots within the neighbourhood most similar to himself. Among the empty spots, the affordable ones are detected and among these, the agent moves to the one in the best condition and closest to the centre. Failing to find a suitable spot results in the agent trying in a different neighbourhood, then lowering its requirements and ultimately leaving the city.
 
-# Results
+# Results [outdated]
 ## THE PROBLEM OF SETTING A LOCATION TO THE "HIGHEST AND BEST USE"
 
 Setting the price to the maximum or the average makes a huge difference, regardless of the scope of the area considered.
