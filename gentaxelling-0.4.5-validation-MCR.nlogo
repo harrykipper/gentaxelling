@@ -1,7 +1,7 @@
 extensions [gis table]
 
 globals [
-  version save-dir save-dir-pics city prices slums badstate immigration districts file-name-pop disp? disp-freq 
+  version save-dir save-dir-pics city prices slums badstate immigration districts file-name-pop disp? disp-freq
   downfiltered-districts gentrified-districts file-name-entropy file-name-prices file-name-income areas noncitypc noncityareas
   neighbourhoods-table file-name-validation file-name-world allured-districts firstallure incomes ethni housing-waiting-list
   recolonisation degentrification recreation regentrification file-name-Pendleton lsoas msoas socialhousing surround casestudy
@@ -65,7 +65,7 @@ to setup
   gis:apply-coverage incomes "MSOA01NM" msoa01
   gis:apply-coverage socialhousing "DIFF0111" prob-soc-change
   set noncitypc ["M23 0PB" "M23 0AB" "M25 2SW" "M8  4LZ" "M23 0AB" "M9  8ED" "M9  8LX" "M45 7QJ" "M30 0SF" "M30 9QG" "M29 7LW" "M29 7EN"
-    "M27 8LU" "M23 0PB" "M20 2UE" "M33 2JT" "M33 2JU" "M33 2LX" "M22 4NQ" "M20 2YH" "M22 4FR" "M27 6LH" "M5  4NT" "M7  1PA" 
+    "M27 8LU" "M23 0PB" "M20 2UE" "M33 2JT" "M33 2JU" "M33 2LX" "M22 4NQ" "M20 2YH" "M22 4FR" "M27 6LH" "M5  4NT" "M7  1PA"
     "M5  4RB" "M6  8GL" "M6  6AW" "M6  6DB" "SK5 8NZ" "SK5 7QG" "M21 7GL" "S20 2LT"]
   set noncityareas ["M17" "M60"]
   ask patches with [
@@ -142,7 +142,7 @@ end
 to generate-area-economic-status
   foreach gis:feature-list-of incomes [
     let averageincome gis:property-value ? "INCOME_200"
-    let whichplace gis:property-value ? "MSOA01NM" 
+    let whichplace gis:property-value ? "MSOA01NM"
     ask citizens-on city with [msoa01 = whichplace] [
       set income random-poisson (averageincome * 54)
       set hidden? false
@@ -163,8 +163,8 @@ to set-social
   ]
 end
 
-to assign-social-housing 
-  let howmany count city with [social? = true and count citizens-here = 0] 
+to assign-social-housing
+  let howmany count city with [social? = true and count citizens-here = 0]
   if howmany > table:length housing-waiting-list [set howmany table:length housing-waiting-list]
   repeat howmany [
     let everybody []
@@ -199,14 +199,14 @@ end
 
 to generate-area-cultural-configuration
   foreach gis:feature-list-of ethni [
-    let whichplace gis:property-value ? "LSOA11NM" 
+    let whichplace gis:property-value ? "LSOA11NM"
     let totalpop citizens-on city with [lsoa11 = whichplace]
     let muslim round (gis:property-value ? "R_MUSLIM" * count totalpop)
     let christian round (gis:property-value ? "R_CHRISTIA" * count totalpop)
     let jewish round (gis:property-value ? "R_JEWISH" * count totalpop)
     let whites round (gis:property-value ? "E_WHITEBRI" * count totalpop)
     let blacks round ((gis:property-value ? "E_BLACKAFR" + gis:property-value ? "E_BLACKCAR" + gis:property-value ? "E_OTHERBLA") * count totalpop)
-    let subcontinent round ((gis:property-value ? "E_INDIAN" + gis:property-value ? "E_PAKISTAN" + gis:property-value ? "E_BANGLADE") * count totalpop) 
+    let subcontinent round ((gis:property-value ? "E_INDIAN" + gis:property-value ? "E_PAKISTAN" + gis:property-value ? "E_BANGLADE") * count totalpop)
     let chinese round (gis:property-value ? "E_CHINESE" * count totalpop)
     ; show (word "Area: " whichplace " - Population: " totalpop "Christians: " christian "- Muslims: " muslim " - Jew: " jewish " - Whites: " whites " - Blacks: " blacks )
     ask n-of whites totalpop with [item 0 culture = 5] [set culture replace-item 0 culture 0]
@@ -242,17 +242,17 @@ to set-centres-and-distances
     ]
   ]
   ask city [
-    ifelse kind = "monocentric" 
+    ifelse kind = "monocentric"
     [set dist distancexy 15 10] ;; monocentric city
     [
       let centre min-one-of city with [centre? = true] [distance myself]  ;; policentric city
       set dist distance centre
       if distancexy 15 10 <= 15 [set dist distancexy 15 10]
-    ] 
+    ]
   ]
 end
 
-to check-new-allure    ;; This estabilishes whether we need to create a new allure 
+to check-new-allure    ;; This estabilishes whether we need to create a new allure
   foreach districts [
     if [allure] of one-of city with [ward = ?] = 0 [
       if (uniformity ? >= uniformity-for-allure and occupancy ? > 0.3) [
@@ -292,16 +292,16 @@ to build-social-housing [howmany]
   let sofar 0
   let zerop min [price] of city
   let zeroc min [condition] of city
-  let avg mean [price] of city with [count citizens-here > 0] 
+  let avg mean [price] of city with [count citizens-here > 0]
   let firstsocial nobody
   let worst city with [not any? citizens-here and price <= zerop and condition <= zeroc]
-  ifelse any? worst 
-  [set firstsocial min-one-of worst [price-gap]] 
-  [set firstsocial max-one-of city [months-empty]] 
+  ifelse any? worst
+  [set firstsocial min-one-of worst [price-gap]]
+  [set firstsocial max-one-of city [months-empty]]
   ask firstsocial [
     set social? true
     set price avg / 2
-    set condition 0.95 
+    set condition 0.95
     set sofar sofar + 1
     while [sofar < howmany] [
       ask one-of city in-radius 4 with [not social?] [
@@ -336,12 +336,9 @@ to set-neighbourhood
     [set area substring postcode 0 2]
     [set area substring postcode 0 3]
     set neighbourhood (word area " " item 4 postcode)
-    if area = "M1" or area = "M2" or 
-    neighbourhood = "M3 2" or 
-    neighbourhood = "M3 3" or 
-    neighbourhood = "M3 4" or 
-    neighbourhood = "M3 1" or
-    neighbourhood = "M3 9"
+    let centrearea ["M1" "M2"]
+    let centreneigh ["M3 2" "M3 3" "M3 4" "M3 1" "M3 9"]
+    if member? area centrearea or member? neighbourhood centreneigh
     [
       set plabel "C"
       set neighbourhood "Central"
@@ -394,7 +391,7 @@ to set-neighbourhood
    if neighbourhood = "M11 1" or neighbourhood = "M11 2" [set ward "Openshaw"]
    if neighbourhood = "M41 6" [set ward "Flixton"]
    if neighbourhood = "M22 4" [set ward "Northenden"]
- ; ] 
+ ; ]
 ;[
  ; let neigh one-of neighbors with [is-string? postcode]
  ; set postcode [postcode] of neigh
@@ -404,7 +401,7 @@ end
 
 to set-city-condition
   ask city [set condition 0]
-  ifelse actual-values? 
+  ifelse actual-values?
   [set-actual-condition]
   [ask patches [
       set condition price - 0.15
@@ -457,7 +454,7 @@ to create-ethnic-division
 end
 
 to create-economic-status
-  ifelse actual-values?    
+  ifelse actual-values?
   [
     ask people [set income 0]         ;; taken from https://en.wikipedia.org/wiki/Income_in_the_United_Kingdom#Wealth
     let totalpop count people
@@ -478,7 +475,7 @@ to reset-mobility-propensity
   set mobility-propensity (random-float prob-move) + 0.01
 end
 
-to create-skewed-economic-status  
+to create-skewed-economic-status
   ;;  adjust one up and one down each time since this method changes the mean - Not SURE this is an improvement!
   let thresh 0.05
   let chng 0.8
@@ -508,7 +505,7 @@ to create-skewed-economic-status
     ;  show (word med " " gini people)
     ]
   ]
-end 
+end
 
 to-report gini [group]
 ;; Gini calculation code borrowed from the 'wealth distribution' model.
@@ -592,7 +589,7 @@ end
 to-report similarity [a b]
   let sim 0
   ifelse is-turtle? b [
-    (foreach ([culture] of a) ([culture] of b)  
+    (foreach ([culture] of a) ([culture] of b)
       [if ?1 = ?2 [set sim sim + 1] ] )
   ]
   [
@@ -604,7 +601,7 @@ end
 
 to go
   ask city [
-    ifelse unified? = true 
+    ifelse unified? = true
     [set-gaps-unified]
     [set-gaps-lnd]
     if social? = false [decay]
@@ -612,7 +609,7 @@ to go
     ifelse social?
     [
       set price median [price] of city with [neighbourhood = [neighbourhood] of self] * 0.66
-      reverse-social
+      if remove-SH [reverse-social]
       ]
     [update-price]
   ]
@@ -680,7 +677,7 @@ to determine-super-phenomenon [district case]  ;; when a place lost than regaine
     ifelse mean [income] of citizens-on city with [ward = district] >= (item 0 table:get gentrified-districts district - 0.1) and mean [price] of city with [ward = district] >= (item 1 table:get gentrified-districts district - 0.1)
     [set recolonisation recolonisation + 1]
     [set degentrification degentrification + 1]
-  ] 
+  ]
   [ ; here originally downfiltering dissolved uniformity
     ifelse mean [income] of citizens-on city with [ward = district] <= (item 0 table:get downfiltered-districts district + 0.1)
     [set recreation recreation + 1]
@@ -690,11 +687,11 @@ end
 
 to do-business ;; Renovation happens twice a year according to available capital.
   let howmany (Kapital * count city) / 2
-  let goodgap city with [price-gap >= (price * profit-threshold) and social? = false and condition < 0.70] 
+  let goodgap city with [price-gap >= (price * profit-threshold) and social? = false and condition < 0.70]
   if count goodgap < howmany [set howmany count goodgap]
   ask max-n-of howmany goodgap [price-gap] [renovate]
   ask max-n-of (count city with [social?] * 0.20 / 10 / 2) city with [social?] [price-gap] [   ;; un cazzo di numero magico in mezzo al modello senza nessuna giustificazione, nessun link, niente.
-    set social? false                                ;; Ti devono mangiare i cani. La fine che farai te la meriti fino all'ultimo  
+    set social? false                                ;; Ti devono mangiare i cani. La fine che farai te la meriti fino all'ultimo
     renovate
   ]
 end
@@ -726,7 +723,7 @@ to leave-city
 end
 
 to enter-housing-list [agent place]
-  ;; set housing-waiting-list lput (list(agent)(place)) housing-waiting-list 
+  ;; set housing-waiting-list lput (list(agent)(place)) housing-waiting-list
   table:put housing-waiting-list [who] of agent place
   ask agent [
     set breed people
@@ -747,7 +744,7 @@ end
 to seek-place
 ;; When seeking a spot we consider vacant affordable places close to the (city or district) centre and with a pleasant cultural mix.
 ;; This is in line with Jackson et al. 2008, although they have a Schelling-like ethnic (not cultural) mix.
-;; In this version agents only evaluate the CULTURAL ALLURE of a district, not the STATUS. 
+;; In this version agents only evaluate the CULTURAL ALLURE of a district, not the STATUS.
 ;; If we are to finegrain the model we could also include status in the decision process.
   let howmuch income
   if actual-values? [set howmuch income * Credit]
@@ -785,7 +782,7 @@ to relocate [will]
     let testbed n-of (count city / 10) city
     let condi mean [condition] of testbed
     let secondbest baseline with [(price <= will) and (count citizens-here = 0) and (condition >= (condi - (condi * 0.15 )))]  ;; if we can't find a place we like then we move to one we can afford
-    ifelse any? secondbest 
+    ifelse any? secondbest
     [move-to min-one-of secondbest [dist]]
     [move-to min-one-of baseline [dist]]
   ][enter-housing-list self ""]  ;; if no place exists we apply for social housing
@@ -821,7 +818,7 @@ to weak-relocate-to [place will]
     ifelse any? ideal
     [move-to min-one-of ideal [dist]]
     [let secondbest city with [(price <= will) and (count citizens-here = 0) and (condition >= (mean [condition] of city - (mean [condition] of city * 0.15 )))]  ;; if we can't find a place we like then we move to one we can afford
-      ifelse any? secondbest 
+      ifelse any? secondbest
       [move-to min-one-of secondbest [dist]]
       [let thirdbest city with [(price <= will) and (count citizens-here = 0)  ] ;; Uncomment the following to prevent people from moving in decrepit locations ;and (condition > 0)
        ifelse any? thirdbest [move-to min-one-of thirdbest [dist]] [leave-city]  ;; if no place exists we leave the city.
@@ -861,12 +858,12 @@ to set-gaps
     ifelse count sample > 0
      [set areaprice max [price] of sample]
      [set areaprice median [price] of city with [neighbourhood = [neighbourhood] of myself] * 0.80]
-    ifelse count goodneigh > 0 
+    ifelse count goodneigh > 0
     [set neigh-price max [price] of goodneigh]
     [set neigh-price median [price] of neighz * 0.8]
     ]
   [
-    ifelse count goodneigh > 0 
+    ifelse count goodneigh > 0
     [set neigh-price median [price] of goodneigh]
     [set neigh-price median [price] of neighz * 0.8]
     ifelse count sample > 0
@@ -903,7 +900,7 @@ to set-gaps-unified
     ifelse count sample > 0
       [set areaprice median [price] of sample]
       [set areaprice median [price] of city with [neighbourhood = [neighbourhood] of myself] * 0.80]
-    ifelse count goodneigh > 0 
+    ifelse count goodneigh > 0
       [set neigh-price median [price] of goodneigh]
       [set neigh-price median [price] of neighz * 0.8]
   ]
@@ -930,8 +927,8 @@ to decay
     [set condition condition - depr]
 end
 
-to update-price   ;; Price reconsideration happens every MONTH 
-  let depr annual-depreciation-rate / 12   ;;; Price "naturally" decays 2%/year 
+to update-price   ;; Price reconsideration happens every MONTH
+  let depr annual-depreciation-rate / 12   ;;; Price "naturally" decays 2%/year
   let time ticks - last-renovated
   if time <= 36 [set depr 0]
   if time > 36 and time <= 60 [set depr depr / 2]
@@ -941,7 +938,7 @@ to update-price   ;; Price reconsideration happens every MONTH
 end
 
 to update-emptiness
-  ifelse count citizens-here = 0 
+  ifelse count citizens-here = 0
   [set months-empty months-empty + 1]
   [set months-empty 0]
 end
@@ -988,7 +985,8 @@ to update-dissonance
 end
 
 to update-propensity
-  ask citizens [
+  ask citizens [  ;; fixed bug in accordance with LND
+    if time-in-a-slum = 0 and dissonance <= tolerable-dissonance [reset-mobility-propensity]
     if ((time-in-a-slum > 12) and ((income * credit) > [price] of patch-here * 1.20))
     or (median [condition] of neighz <= 0.15) [set mobility-propensity mobility-propensity * 1.50]
     if dissonance > tolerable-dissonance [
@@ -996,12 +994,11 @@ to update-propensity
       if random-float 1 < 0.05 [mutate]
       ]
     if mobility-propensity > 1 [set mobility-propensity 1]
-    if time-in-a-slum = 0 and dissonance <= tolerable-dissonance [reset-mobility-propensity]
   ]
 end
 
-;; The idea here is that prolonged co-location leads to cultural mixing. 
-;; We need each household to keep track of how long they have been neighbours with each other 
+;; The idea here is that prolonged co-location leads to cultural mixing.
+;; We need each household to keep track of how long they have been neighbours with each other
 to interact
   ask links with [time > 6] [
     let a item 0 sort both-ends
@@ -1018,7 +1015,7 @@ to interact
 end
 
 ;to boost-centre
-;  ask min-one-of 
+;  ask min-one-of
 ;end
 
 to PENDLETON
@@ -1092,7 +1089,7 @@ to prepare-data-save
   let run-number 0
   ;if PUSH? [set push "PUSH"]
   ;if PULL? [set pull "PULL"]
-  ;ifelse actual-values? 
+  ;ifelse actual-values?
   ;[set actual "ACTUAL"]
   ;[set actual "RANDOM"]
   ;if behaviorspace-run-number != 0 [set run-number behaviorspace-run-number]
@@ -1103,22 +1100,22 @@ to prepare-data-save
   ;set file-name-income (word save-dir "gentax-" version "-INCOME-" regenerate? "-I-" immigration-rate "-" gap-type  "-" gap-value "-" kind "-K" Kapital ".csv")
   ;set file-name-Pendleton (word save-dir "gentax-" version "-REGENERATION-" regenerate? "-I-" immigration-rate "-" gap-type  "-" gap-value "-" kind "-K" Kapital ".csv")
   ;file-open file-name-entropy
-  ;file-write "ticks;" 
+  ;file-write "ticks;"
   ;foreach districts [file-write (word ? ";")]
   ;file-print ""
   file-open file-name-validation
   file-write "ticks;"
   foreach msoas [file-write (word ? ";")]
-  file-print "" 
+  file-print ""
   ;file-open file-name-prices
   ;file-write "ticks;"
-  ;foreach districts [file-write (word ? ";")] 
+  ;foreach districts [file-write (word ? ";")]
   ;file-print ""
   ;file-open file-name-Pendleton
   ;file-write "ticks;areaPrice;surroundPrice;cityPrice;areaIncome;surroundIncome;cityIncome;cityUniformity;caseUniformity;surroundUniformity"
   ;file-print ""
   ;file-open file-name-income
-  ;file-write "ticks;" 
+  ;file-write "ticks;"
   ;foreach msoas [file-write (word ? ";")]
   ;file-print ""
   file-close-all
@@ -1129,7 +1126,7 @@ to save-data-Pend
   file-print (word ticks ";" caseprice ";" surroundprice ";" cityprice ";" caseincome ";" surroundincome ";" cityincome ";" cityUniformity ";" caseUniformity ";" surroundUniformity)
   file-close
 end
-  
+
 to save-data
   let gap-type "AREA"
   if area-gaps? = false [set gap-type "LOCAL"]
@@ -1142,7 +1139,7 @@ to save-data
   file-open file-name-validation
   file-write (word ticks ";")
   foreach msoas [file-write (word mean [price] of city with [msoa01 = ? and not social?] ";")]
-  file-print " " 
+  file-print " "
   ;file-open file-name-prices
   ;file-write (word ticks ";")
   ;foreach districts [file-write (word median [price] of city with [ward = ?] ";")]
@@ -1797,6 +1794,17 @@ GAPS
 0.0
 1
 
+SWITCH
+704
+1354
+833
+1387
+remove-SH
+remove-SH
+1
+1
+-1000
+
 @#$#@#$#@
 # Introduction
 
@@ -1804,14 +1812,14 @@ GAPS
 
 This is a city-scale residential mobiliy model with benefits. It couples residential choice with investment/disinvestment and cultural dynamics. Agents are created with a unique culture + income level and move throughout the city in search of a location that, in order of importance, is:
 
-* affordable 
-* in relatively good condition 
-* as close as possible to the centre of the city  
-* located in a culturally appealing neighbourhood (cultural pull). 
+* affordable
+* in relatively good condition
+* as close as possible to the centre of the city
+* located in a culturally appealing neighbourhood (cultural pull).
 
-Dwellings (individual patches) have a price and a mainteniance condition. They progressively decay in their condition and, accordingly, in their asking price. 
+Dwellings (individual patches) have a price and a mainteniance condition. They progressively decay in their condition and, accordingly, in their asking price.
 
-If sufficient Kapital is available, renovation is carried out on those locations that present the wider "price-gap" with the neighbouring properties, as proposed in most computational implementations of Neil Smith's (RIP) rent-gap theory. 
+If sufficient Kapital is available, renovation is carried out on those locations that present the wider "price-gap" with the neighbouring properties, as proposed in most computational implementations of Neil Smith's (RIP) rent-gap theory.
 After renovation a property is reset to the highest possible condition and is able to charge a price equal to the average of neighbouring properties + a 15% premium.
 
 # Model detail
@@ -1821,19 +1829,19 @@ The agent's **income level** is set at random, normalized to the interval 0-1. N
 Agents are also created with a **mobility-propensity** parameter, which is very low in the beginning (the initial probability to move is poisson distributed in the population centred on 0.001/month).
 
 ### Micro-level cultural dynamics
-Long time neighbouring agents with at least one common trait are more likely to interact and exchange traits, thus rendering the respective cultural strings more similar. A **cultural cognitive dissonance** parameter implements a concept proposed by Portugali (1996): this is, roughly, the frustration of being surrounded by too many culturally distant agents. Yes, it's Schelling in other terms. 
+Long time neighbouring agents with at least one common trait are more likely to interact and exchange traits, thus rendering the respective cultural strings more similar. A **cultural cognitive dissonance** parameter implements a concept proposed by Portugali (1996): this is, roughly, the frustration of being surrounded by too many culturally distant agents. Yes, it's Schelling in other terms.
 
 ### Residential mobility
-One agent's mobility propensity attribute is increased when: 
+One agent's mobility propensity attribute is increased when:
 
-* Excessive time is spent in a dwelling in very bad condition (slum) 
+* Excessive time is spent in a dwelling in very bad condition (slum)
 * The cultural cognitive dissonance level is high for too long (cultural push).
 * The price of the dwelling currently occupied exceeds the agent's income (in this case the agent is automatically put in "seek new place" mode)
 
 ## Land dynamics
 The city is divided in 5 neighbourhoods (Central, NorthWest, NorthEast, SouthWest and SouthEast) of the same size (10x10), excluding the centre which is 4x4.
 
-Every neighbourhood has an "**allure**", or reputation, based on the average cultural configuration of its inhabitants. This attribute is visible to perspective movers and tends to be "sticky", i.e. is updated seldom and not always reflects the actual composition of the neighbourhood. 
+Every neighbourhood has an "**allure**", or reputation, based on the average cultural configuration of its inhabitants. This attribute is visible to perspective movers and tends to be "sticky", i.e. is updated seldom and not always reflects the actual composition of the neighbourhood.
 
 Dwellings' price and condition are initially set at a random value normalized in the 0-1 interval, with price being set at 0.25 above condition. Decay happens at every step by a fixed factor (currently 0.0016 per month, meaning that a property decays from 1 to 0 in 50 years) which is increased by 25% when the dwelling is empty. The price of the dwelling is adjusted every year and is decreased if the dwelling has been empty.
 
@@ -1852,9 +1860,9 @@ At **Kapital > 15** a pattern is visible: the centre of the city and the immedia
 
 When Kapital reaches **K=25** (~6% of dwellings being refurbished each year) two or three entire neighbourhoods are able to attract all the investments. In this case the city tends to divide into two distinct areas, roughly of the same size: one with high price / high repair condition and one of slums.
 
-Around this value the most interesting effects emerge. Gentrification can be spotted often, with neighbourhoods steadily increasing the mean income while the population decreases and increase abruptly, often in several waves, signalling that the poor go and the rich come. 
+Around this value the most interesting effects emerge. Gentrification can be spotted often, with neighbourhoods steadily increasing the mean income while the population decreases and increase abruptly, often in several waves, signalling that the poor go and the rich come.
 
-A **Kapital > 35** (refurbishing 8% per year) is able to trigger high prices/ high mainteniance in the whole city. The population is very low because only the richest immigrants can afford to enter the city. 
+A **Kapital > 35** (refurbishing 8% per year) is able to trigger high prices/ high mainteniance in the whole city. The population is very low because only the richest immigrants can afford to enter the city.
 Interestingly, dissonance levels tend to be higher with higher investments. Even though there is no relation between income levels and culture, a high priced / highly selective city makes it difficult for agents to find compatible neighbours. Because the low population doesn't add enough diversity to the mix, a sort of "boring little village" effect or "boring white flight suburb" effect emerges.
 
 ## Cultural dynamics
@@ -1892,7 +1900,7 @@ The population is now generated more realistically using census data regarding i
 * Income: “Model based” estimates 2007 - MSOA2001
 
 
-We also use 2% as base yearly depreciation (doubled if empty for 6 months or more). 
+We also use 2% as base yearly depreciation (doubled if empty for 6 months or more).
 
 Tried setting gaps according to local (moore) maximum or neighbourhood maximum. The latter case produces half of the city with completely unaffordable prices. Local maximum or neighbourhood average more realistic?
 
@@ -2218,7 +2226,7 @@ Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 
 @#$#@#$#@
-NetLogo 5.2.0
+NetLogo 5.3.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
