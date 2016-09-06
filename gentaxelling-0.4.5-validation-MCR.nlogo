@@ -9,7 +9,7 @@ globals [
 
 links-own [time]
 
-turtles-own [mobility-propensity time-here birthday culture income dissonance place-changes time-in-a-slum ]
+turtles-own [mobility-propensity time-here birthday culture income dissonance place-changes time-in-a-slum owner?]
 
 patches-own [
   postcode condition al-longevity condition-previousyear price price-gap months-empty area
@@ -134,7 +134,9 @@ end
 
 to populate-city
   create-citizens N-Agents [render-human]
-  ask citizens [move-to one-of city with [count citizens-here = 0]]
+  ask citizens [
+    set owner? false    ;; we will turn some of them later
+    move-to one-of city with [count citizens-here = 0]]
   generate-area-economic-status
   generate-area-cultural-configuration
 end
@@ -142,12 +144,21 @@ end
 to generate-area-economic-status
   foreach gis:feature-list-of incomes [
     let averageincome gis:property-value ? "INCOME_200"
+    let probowned gis:property-value ? "OWNED"
     let whichplace gis:property-value ? "MSOA01NM"
     ask citizens-on city with [msoa01 = whichplace] [
       set income random-poisson (averageincome * 54)
+      if have-owners? = true [
+        if random 1 <= probowned [set owner? true]
+      ]
       set hidden? false
     ]
   ]
+end
+
+to-report is-owned?
+  if any? citizens-here with [owner?] [report true]
+  report false
 end
 
 to set-social
@@ -155,7 +166,10 @@ to set-social
     let whichplace gis:property-value ? "LSOA01NM"
     let proportionsocial gis:property-value ? "PCT01"
     let tot city with [lsoa01 = whichplace]
-    ask n-of ((proportionsocial / 100) * count tot) tot [set social? true]
+    let sociable tot with [is-owned? = false]
+     ifelse count sociable >= proportionsocial
+    [ask n-of proportionsocial sociable [set social? true]]
+    [ask sociable [set social? true]]
     ask city with [social? = true] [
       set pcolor red
       set condition 0.66
@@ -734,7 +748,7 @@ end
 to-report decide-moving
   let param income
   if actual-values? [set param income * Credit]
-  if ([price] of patch-here > param and [social?] of patch-here = FALSE) or (random-float 1 < mobility-propensity) [
+  if ([price] of patch-here > param and [social?] of patch-here = FALSE and owner? = FALSE) or (random-float 1 < mobility-propensity) [
     set place-changes place-changes + 1
     report true
   ]
@@ -837,9 +851,12 @@ to set-gaps-lnd
   [set areaprice max [price] of sample]
   [set areaprice mean [price] of sample]
   set whichprice areaprice * renovation-premium
-  ifelse whichprice > price
+  ifelse whichprice > price [
+    ifelse any? citizens-here with [owner? = false and (income * credit) < whichprice]
       [set price-gap (whichprice - (price + (resident-removal-cost * price)))]   ;; we anticipate whether we will have to kick someone out
-      [set price-gap 0]
+      [set price-gap (whichprice - price)]
+  ]
+  [set price-gap 0]
 end
 
 to set-gaps
@@ -1795,12 +1812,23 @@ GAPS
 1
 
 SWITCH
-704
-1354
-833
-1387
+307
+1305
+436
+1338
 remove-SH
 remove-SH
+1
+1
+-1000
+
+SWITCH
+310
+1346
+456
+1379
+have-owners?
+have-owners?
 1
 1
 -1000
