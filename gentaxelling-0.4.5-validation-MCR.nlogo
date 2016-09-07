@@ -147,10 +147,8 @@ to generate-area-economic-status
     let probowned gis:property-value ? "OWNED"
     let whichplace gis:property-value ? "MSOA01NM"
     ask citizens-on city with [msoa01 = whichplace] [
-      set income random-poisson (averageincome * 54)
-      if have-owners? = true [
-        if random 1 <= probowned [set owner? true]
-      ]
+      set income random-poisson (averageincome * 55)  ;; 55 weeks ;-)
+      if have-owners? = true [if random 1 <= probowned [set owner? true]]
       set hidden? false
     ]
   ]
@@ -164,10 +162,11 @@ end
 to set-social
   foreach gis:feature-list-of socialhousing [
     let whichplace gis:property-value ? "LSOA01NM"
-    let proportionsocial gis:property-value ? "PCT01"
+    let proportionsocial (gis:property-value ? "PCT01") / 100
     let tot city with [lsoa01 = whichplace]
+    let prop-soc round tot * proportionsocial
     let sociable tot with [is-owned? = false]
-     ifelse count sociable >= proportionsocial
+    ifelse count sociable >= prop-soc
     [ask n-of proportionsocial sociable [set social? true]]
     [ask sociable [set social? true]]
     ask city with [social? = true] [
@@ -649,7 +648,7 @@ to go
   ask citizens [color-agent]
   tick
   ;save-data-Pend
-  if ticks mod 12 = 0 [
+  if ticks = 1 or ticks mod 12 = 0 [
     if write-csv? [save-data]
     if Record? [movie-grab-view]
   ]
@@ -1165,7 +1164,7 @@ to save-data
   if behaviorspace-run-number != 0 [set run-number behaviorspace-run-number]
   file-open file-name-prices
   if run-number = 1 [
-    file-write (word ticks ";")
+    file-write ( "ticks;K;remove-SH;Immigration;gaptype;")
     foreach msoas [file-write (word ? ";")]
     file-print ""
   ]
@@ -2298,13 +2297,13 @@ NetLogo 5.3.1
       <value value="&quot;monocentric&quot;"/>
       <value value="&quot;policentric&quot;"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="area-gaps?">
-      <value value="true"/>
-      <value value="false"/>
-    </enumeratedValueSet>
     <enumeratedValueSet variable="areamax?">
       <value value="true"/>
       <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="remove-sh">
+      <value value="&quot;true&quot;"/>
+      <value value="&quot;false&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="write-csv?">
       <value value="true"/>
