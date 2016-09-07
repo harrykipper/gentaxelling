@@ -164,7 +164,7 @@ to set-social
     let whichplace gis:property-value ? "LSOA01NM"
     let proportionsocial (gis:property-value ? "PCT01") / 100
     let tot city with [lsoa01 = whichplace]
-    let prop-soc round tot * proportionsocial
+    let prop-soc round (count tot * proportionsocial)
     let sociable tot with [is-owned? = false]
     ifelse count sociable >= prop-soc
     [ask n-of proportionsocial sociable [set social? true]]
