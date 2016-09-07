@@ -43,14 +43,14 @@ to setup
   set gentrified-districts table:make
   set downfiltered-districts table:make
   set housing-waiting-list table:make
-  set save-dir "/home/stefano/Dropbox/urban/results/"
+  set save-dir "./results/"
   set save-dir-pics (word save-dir "pics/")
-  let gis-data-dir "/home/stefano/ownCloud/GIS/Manchester/"
+  let gis-data-dir "./GIS/Manchester/"
   ask patches [set pcolor blue]
   set prices gis:load-dataset (word gis-data-dir "validation/Prices_2001_initial_new.shp")
   set slums gis:load-dataset (word gis-data-dir "NoHeating_2001.shp")
   set badstate gis:load-dataset (word gis-data-dir "Living_Environment.shp")
-  set incomes gis:load-dataset (word gis-data-dir "Income.shp")
+  set incomes gis:load-dataset (word gis-data-dir "IncomeOwnership.shp")
   set ethni gis:load-dataset (word gis-data-dir "Religion+Ethnicity.shp")
   set socialhousing gis:load-dataset (word gis-data-dir "SocialHousing_01-11.shp")
   gis:set-world-envelope gis:envelope-of prices
@@ -1097,13 +1097,15 @@ end
 
 
 to prepare-data-save
+  let run-number 0
+  if behaviorspace-run-number != 0 [set run-number behaviorspace-run-number]
   ;let push ""
   ;let pull ""
   let gap-type "AREA"
   if area-gaps? = false [set gap-type "LOCAL"]
   let gap-value "MEAN"
   if areamax? [set gap-value "MAX"]
-  let run-number 0
+
   ;if PUSH? [set push "PUSH"]
   ;if PULL? [set pull "PULL"]
   ;ifelse actual-values?
@@ -1113,17 +1115,17 @@ to prepare-data-save
   ;set file-name-entropy (word save-dir "gentax-" version "-UNIFORMITY-" regenerate? "-I-" immigration-rate "-" gap-type "-" gap-value "-" kind "-K" Kapital ".csv")
   ;set file-name-pop (word save-dir "gentax-" version "-POPULATION-" regenerate? "-I-" immigration-rate "-" gap-type "-" gap-value "-" kind "-K" Kapital ".csv")
   ;set file-name-prices (word save-dir "gentax-" version "-PRICES-" regenerate? "-I-" immigration-rate "-" gap-type "-" gap-value "-" kind "-K" Kapital ".csv")
-  set file-name-validation (word save-dir "gentax-" version "-VALIDATION-" "-I-" immigration-rate "-" unified? "-" gap-value "-" kind "-K" Kapital ".csv")
+  ;set file-name-validation (word save-dir "gentax-" version "-VALIDATION-" "-I-" immigration-rate "-" unified? "-" gap-value "-" kind "-K" Kapital ".csv")
   ;set file-name-income (word save-dir "gentax-" version "-INCOME-" regenerate? "-I-" immigration-rate "-" gap-type  "-" gap-value "-" kind "-K" Kapital ".csv")
   ;set file-name-Pendleton (word save-dir "gentax-" version "-REGENERATION-" regenerate? "-I-" immigration-rate "-" gap-type  "-" gap-value "-" kind "-K" Kapital ".csv")
   ;file-open file-name-entropy
   ;file-write "ticks;"
   ;foreach districts [file-write (word ? ";")]
   ;file-print ""
-  file-open file-name-validation
-  file-write "ticks;"
-  foreach msoas [file-write (word ? ";")]
-  file-print ""
+  ;file-open file-name-validation
+  ;file-write "ticks;"
+  ;foreach msoas [file-write (word ? ";")]
+  ;file-print ""
   ;file-open file-name-prices
   ;file-write "ticks;"
   ;foreach districts [file-write (word ? ";")]
@@ -1144,19 +1146,41 @@ to save-data-Pend
   file-close
 end
 
+;to save-data
+  ;export-all-plots (word save-directory "gentax-" version "-plots.csv")  ; save all the plots
+
+;[file-print (word "run#;K;gaps;pct-slums-10;pct-slums-200;pct-slums-400;pct-slums-600;pct-slums-800;pct-slums-1000;pct-slums-1200;pct-good-10;pct-good-200;pct-good-400;pct-good-600;pct-good-800;pct-good-1000;pct-good-1200;medianprices-10;medianprices-200;medianprices-400;medianprices-600;medianprices-800;medianprices-1000;medianprices-1200;medianIncome-10;medianIncome-200;medianIncome-400;medianIncome-600;medianIncome-800;medianIncome-1000;medianIncome-1200")]
+;  file-print (word run-number ";" Kapital ";" gaps ";" howmanySlums ";" howmanyWellMaintained ";" medianprices ";" median-income )
+;  file-close-all
+;end
+
 to save-data
   let gap-type "AREA"
   if area-gaps? = false [set gap-type "LOCAL"]
   let gap-value "MEAN"
   if areamax? [set gap-value "MAX"]
-  ;file-open file-name-entropy
-  ;file-write (word ticks ";")
-  ;foreach districts [file-write (word uniformity ? ";")]
-  ;file-print " "
-  file-open file-name-validation
-  file-write (word ticks ";")
-  foreach msoas [file-write (word mean [price] of city with [msoa01 = ? and not social?] ";")]
-  file-print " "
+  set file-name-prices (word save-dir "gentax-prices" version ".csv")
+  set file-name-income (word save-dir "gentax-income" version ".csv")
+  let run-number 0
+  if behaviorspace-run-number != 0 [set run-number behaviorspace-run-number]
+  file-open file-name-prices
+  if run-number = 1 [
+    file-write (word ticks ";")
+    foreach msoas [file-write (word ? ";")]
+    file-print ""
+  ]
+  file-write ticks
+  foreach msoas [file-write (word median [price] of city with [msoa01 = ? and not social?] ";")]
+  file-print ""
+  file-open file-name-income
+  if run-number = 1 [
+    file-write (word ticks ";")
+    foreach msoas [file-write (word ? ";")]
+    file-print ""
+  ]
+  file-write ticks
+  foreach msoas [file-write (word median [income] of citizens-on city with [msoa01 = ? and not social?] ";")]
+  file-print ""
   ;file-open file-name-prices
   ;file-write (word ticks ";")
   ;foreach districts [file-write (word median [price] of city with [ward = ?] ";")]
@@ -1166,7 +1190,7 @@ to save-data
   ;foreach msoas [file-write (word median [income] of citizens-on city with [msoa01 = ?] ";")]
   ;file-print " "
   file-close-all
-  set file-name-world (word "gentax-" version "-world-k" Kapital "-" unified? "-" gap-value "-I-" immigration-rate "-" kind "-" regenerate? "-" ticks ".png")
+  set file-name-world (word "gentax-" version "-world-k" Kapital "-" remove-SH "-" gap-value "-I-" immigration-rate "-" kind "-" regenerate? "-" ticks ".png")
   export-view (word save-dir-pics file-name-world)
 end
 
