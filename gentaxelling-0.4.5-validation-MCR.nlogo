@@ -148,7 +148,7 @@ to generate-area-economic-status
     let whichplace gis:property-value ? "MSOA01NM"
     ask citizens-on city with [msoa01 = whichplace] [
       set income random-poisson (averageincome * 55)  ;; 55 weeks ;-)
-      if have-owners? = true [if random 1 <= probowned [set owner? true]]
+      if have-owners? = true [if random-float 1 <= probowned [set owner? true]]
       set hidden? false
     ]
   ]
@@ -165,10 +165,10 @@ to set-social
     let proportionsocial (gis:property-value ? "PCT01") / 100
     let tot city with [lsoa01 = whichplace]
     let prop-soc round (count tot * proportionsocial)
-    let sociable tot with [is-owned? = false]
-    ifelse count sociable >= prop-soc
-    [ask n-of proportionsocial sociable [set social? true]]
-    [ask sociable [set social? true]]
+    let non-owned tot with [is-owned? = false]
+    ifelse count non-owned >= prop-soc
+    [ask n-of prop-soc non-owned [set social? true]]
+    [ask non-owned [set social? true]]
     ask city with [social? = true] [
       set pcolor red
       set condition 0.66
@@ -1358,7 +1358,7 @@ immigration-rate
 immigration-rate
 0
 0.2
-0.03
+0.015
 0.0001
 1
 NIL
@@ -1414,7 +1414,7 @@ Kapital
 Kapital
 0
 0.1
-0.035
+0.015
 0.001
 1
 NIL
@@ -1616,7 +1616,7 @@ CHOOSER
 kind
 kind
 "monocentric" "policentric"
-1
+0
 
 SLIDER
 307
@@ -1678,7 +1678,7 @@ SWITCH
 1236
 areamax?
 areamax?
-1
+0
 1
 -1000
 
@@ -1841,7 +1841,7 @@ SWITCH
 1338
 remove-SH
 remove-SH
-1
+0
 1
 -1000
 
@@ -1852,7 +1852,7 @@ SWITCH
 1379
 have-owners?
 have-owners?
-1
+0
 1
 -1000
 
@@ -2288,6 +2288,7 @@ NetLogo 5.3.1
     <timeLimit steps="1440"/>
     <enumeratedValueSet variable="Kapital">
       <value value="0.015"/>
+      <value value="0.035"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="immigration-rate">
       <value value="0.015"/>
@@ -2302,8 +2303,8 @@ NetLogo 5.3.1
       <value value="false"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="remove-sh">
-      <value value="&quot;true&quot;"/>
-      <value value="&quot;false&quot;"/>
+      <value value="true"/>
+      <value value="false"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="write-csv?">
       <value value="true"/>
