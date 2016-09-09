@@ -648,16 +648,17 @@ to go
   ask citizens [color-agent]
   tick
   ;save-data-Pend
-  if ticks = 1 or ticks mod 12 = 0 [
-    if write-csv? [save-data]
-    if Record? [movie-grab-view]
-  ]
+;  if ticks = 1 or ticks mod 12 = 0 [
+;    if write-csv? [save-data]
+;    if Record? [movie-grab-view]
+;  ]
   if ticks = 124 [
    ; if regenerate? = true [PENDLETON]
     if credit-crunch = true [set Kapital Kapital / 2]
   ]
   if ticks = 140 and credit-crunch = true [set Kapital Kapital * 2]
   if ticks = duration [
+    if write-csv? [save-data]
     if Record? [movie-close]
     stop
   ]
@@ -1162,22 +1163,24 @@ to save-data
   set file-name-income (word save-dir "gentax-income" version ".csv")
   let run-number 0
   if behaviorspace-run-number != 0 [set run-number behaviorspace-run-number]
+  let firstline "run#;ticks;K;remove-SH;Immigration;gaptype;"
+  let firstdatum (word run-number ";" ticks ";" Kapital ";" remove-SH ";" immigration-rate ";" gap-value)
   file-open file-name-prices
-  if run-number = 1 [
-    file-write ( "ticks;K;remove-SH;Immigration;gaptype;")
+  if run-number = 1 or run-number = 0 [
+    file-write firstline
     foreach msoas [file-write (word ? ";")]
     file-print ""
   ]
-  file-write ticks
+  file-write firstdatum
   foreach msoas [file-write (word median [price] of city with [msoa01 = ? and not social?] ";")]
   file-print ""
   file-open file-name-income
-  if run-number = 1 [
-    file-write (word ticks ";")
+  if run-number = 1 or run-number = 0 [
+    file-write firstline
     foreach msoas [file-write (word ? ";")]
     file-print ""
   ]
-  file-write ticks
+  file-write firstdatum
   foreach msoas [file-write (word median [income] of citizens-on city with [msoa01 = ? and not social?] ";")]
   file-print ""
   ;file-open file-name-prices
@@ -2282,7 +2285,7 @@ NetLogo 5.3.1
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="15" repetitions="1" runMetricsEveryStep="false">
+  <experiment name="15" repetitions="10" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="1440"/>
