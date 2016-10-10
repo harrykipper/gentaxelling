@@ -1,0 +1,18 @@
+; We test 4 mechanisms to establish the "highest and best use" of a residential unit defined as follows:
+
+== :London: ==
+mean of non empty patches in radius 2 OR 
+mean of patches in radius 2 * 0.65
++ premium
+
+== :New: ==
+max of neighbours8 OR 
+(mean of neighbourhood + premium)
+
+== :Mean: ==
+mean of neighbours8 OR mean of neighbourhood 
++ premium
+
+== :Max: ==
+max of neighbourhood OR max of neighbours8
++ premium

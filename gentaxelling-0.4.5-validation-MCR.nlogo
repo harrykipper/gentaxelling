@@ -111,9 +111,11 @@ end
 to compile-lists
   set districts remove-duplicates [ward] of city
   set areas remove-duplicates [area] of city
-  set msoas remove-duplicates [msoa01] of city
-  foreach msoas [if count city with [msoa01 = ?] < 9 [set city city with [msoa01 != ?]]]
-  set msoas remove-duplicates [msoa01] of city
+  set msoas ["Trafford 004" "Rochdale 024" "Salford 030" "Trafford 015" "Salford 009" "Bolton 034" "Manchester 034" "Salford 001" "Salford 028" "Tameside 019" "Salford 027" "Manchester 006" "Trafford 012" "Salford 013" "Trafford 007" "Manchester 002" "Manchester 008" "Salford 014" "Salford 007" "Tameside 014" "Manchester 010" "Salford 012" "Salford 005" "Manchester 033" "Manchester 043" "Salford 017" "Manchester 027" "Manchester 019" "Stockport 001" "Trafford 006" "Stockport 011" "Salford 022" "Trafford 017" "Trafford 003" "Manchester 005" "Manchester 020" "Wigan 017" "Manchester 037" "Manchester 015" "Tameside 011" "Manchester 024" "Salford 021" "Manchester 044" "Manchester 016" "Manchester 050" "Manchester 031" "Salford 019" "Wigan 029" "Stockport 007" "Salford 024" "Wigan 022" "Salford 025" "Rochdale 021" "Manchester 021" "Bury 014" "Manchester 042" "Tameside 021" "Manchester 028" "Manchester 032" "Trafford 008" "Wigan 025" "Trafford 016" "Salford 023" "Bury 024" "Manchester 009" "Oldham 015" "Manchester 003" "Bury 020" "Manchester 026" "Trafford 020" "Tameside 029" "Bury 019" "Manchester 014" "Manchester 025" "Stockport 004" "Stockport 014" "Trafford 011" "Salford 020" "Bury 026" "Trafford 019" "Manchester 039" "Manchester 012" "Salford 029" "Manchester 035" "Tameside 012" "Bury 022" "Manchester 051" "Wigan 023" "Manchester 052" "Manchester 018" "Manchester 049" "Manchester 017" "Tameside 024" "Rochdale 022" "Tameside 026" "Stockport 006" "Trafford 010" "Manchester 013" "Salford 015" "Bury 012" "Bury 021" "Stockport 008" "Stockport 013" "Manchester 001" "Salford 011" "Manchester 045" "Manchester 040" "Bolton 030" "Oldham 033" "Bury 015" "Manchester 053" "Bury 016" "Manchester 048" "Salford 016" "Manchester 030" "Manchester 022" "Salford 004" "Salford 008" "Manchester 004" "Wigan 028" "Manchester 047" "Tameside 025" "Manchester 011" "Trafford 009" "Salford 006" "Trafford 002" "Stockport 002" "Salford 003" "Trafford 021" "Manchester 038" "Bury 018" "Manchester 046" "Manchester 029" "Manchester 041" "Oldham 031" "Bury 023" "Oldham 034" "Rochdale 025" "Trafford 005" "Salford 018" "Salford 026" "Salford 010" "Trafford 014" "Rochdale 023" "Bury 025" "Trafford 013" "Tameside 010" "Manchester 023" "Oldham 032" "Manchester 007" "Stockport 003" "Manchester 036" "Trafford 018" "Salford 002" "Trafford 001"]
+  set city city with [member? msoa01 msoas]
+;  set msoas remove-duplicates [msoa01] of city
+;  foreach msoas [if count city with [msoa01 = ?] < 9 [set city city with [msoa01 != ?]]]
+  ; set msoas remove-duplicates [msoa01] of city
 end
 
 to render-human
@@ -1164,7 +1166,8 @@ to save-data
   let run-number 0
   if behaviorspace-run-number != 0 [set run-number behaviorspace-run-number]
   let firstline "run#;ticks;K;remove-SH;Immigration;gaptype;"
-  let firstdatum (word run-number ";" ticks ";" Kapital ";" remove-SH ";" immigration-rate ";" gap-value)
+  let firstdatum (word run-number ";" ticks ";" Kapital ";" remove-SH ";" immigration-rate ";" gap-value ";")
+
   file-open file-name-prices
   if run-number = 1 or run-number = 0 [
     file-write firstline
@@ -1174,6 +1177,7 @@ to save-data
   file-write firstdatum
   foreach msoas [file-write (word median [price] of city with [msoa01 = ? and not social?] ";")]
   file-print ""
+
   file-open file-name-income
   if run-number = 1 or run-number = 0 [
     file-write firstline
@@ -1205,6 +1209,35 @@ to-report medianincome [place]
     report median [income] of citizens-on city with [ward = place]
   ][report 0]
 end
+
+;; ============ TESTING ==============
+
+to randomize-msoas
+  let q1 []
+  let q2 []
+  let q3 []
+  let q4 []
+  let q5 []
+  let howmany 31
+  while [not empty? msoas] [
+    let this one-of msoas
+    ifelse length q1 <= howmany [set q1 lput this q1]
+    [ifelse length q2 <= howmany [set q2 lput this q2] 
+      [ifelse length q3 <= howmany [set q3 lput this q3] 
+        [ifelse length q4 <= howmany [set q4 lput this q4] [set q5 lput this q5]
+        ]
+      ]
+    ]
+        set msoas remove this msoas
+  ]  
+show q1
+show q2
+show q3
+show q4
+show q5
+end
+
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 3
@@ -1361,7 +1394,7 @@ immigration-rate
 immigration-rate
 0
 0.2
-0.015
+0.03
 0.0001
 1
 NIL
@@ -1391,7 +1424,7 @@ N-Agents
 N-Agents
 0
 count patches
-4300
+3600
 1
 1
 NIL
@@ -1619,7 +1652,7 @@ CHOOSER
 kind
 kind
 "monocentric" "policentric"
-0
+1
 
 SLIDER
 307
@@ -1681,7 +1714,7 @@ SWITCH
 1236
 areamax?
 areamax?
-0
+1
 1
 -1000
 
@@ -1844,7 +1877,7 @@ SWITCH
 1338
 remove-SH
 remove-SH
-0
+1
 1
 -1000
 
@@ -2285,13 +2318,15 @@ NetLogo 5.3.1
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="15" repetitions="10" runMetricsEveryStep="false">
+  <experiment name="15" repetitions="5" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
-    <timeLimit steps="1440"/>
+    <timeLimit steps="157"/>
+    <enumeratedValueSet variable="N-Agents">
+      <value value="3600"/>
+    </enumeratedValueSet>
     <enumeratedValueSet variable="Kapital">
       <value value="0.015"/>
-      <value value="0.035"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="immigration-rate">
       <value value="0.015"/>
@@ -2308,9 +2343,6 @@ NetLogo 5.3.1
     <enumeratedValueSet variable="remove-sh">
       <value value="true"/>
       <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="write-csv?">
-      <value value="true"/>
     </enumeratedValueSet>
   </experiment>
   <experiment name="20" repetitions="1" runMetricsEveryStep="true">
